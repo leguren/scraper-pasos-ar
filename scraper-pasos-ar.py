@@ -51,10 +51,28 @@ def obtener_estado(paso):
                 if sibling and isinstance(sibling, str):
                     horario = sibling.strip()
                 break
+                
+        # provincia
+        provincia = None
+        strong_prov = soup.find('strong', string=lambda t: t and 'Provincia:' in t)
+        if strong_prov:
+            p_padre = strong_prov.find_parent('p')
+            if p_padre:
+                provincia = p_padre.get_text(strip=True).replace('Provincia:', '').strip()
 
+        # país limítrofe
+        pais = None
+        strong_pais = soup.find('strong', string=lambda t: t and 'País limítrofe:' in t)
+        if strong_pais:
+            p_padre = strong_pais.find_parent('p')
+            if p_padre:
+                pais = p_padre.get_text(strip=True).replace('País limítrofe:', '').strip()
+                
         return {
             "nombre": paso["nombre"],
             "url": url,
+            "provincia": provincia,
+            "pais": pais,
             "estado": estado,
             "ultima_actualizacion": ultima_actualizacion,
             "localidades": localidades_text,
@@ -64,6 +82,8 @@ def obtener_estado(paso):
         return {
             "nombre": paso["nombre"],
             "url": url,
+            "provincia": None,
+            "pais": None,
             "estado": None,
             "ultima_actualizacion": None,
             "localidades": None,
@@ -97,3 +117,4 @@ def health():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
