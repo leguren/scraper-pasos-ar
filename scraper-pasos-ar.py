@@ -1,14 +1,15 @@
 import os
 import json
-from flask import Flask, jsonify
-import requests
+import httpx
+from fastapi import FastAPI
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-app = Flask(__name__)
+app = FastAPI()
 
 # === CARGAR PASOS DESDE ARCHIVO LOCAL (en el contenedor) ===
 PASOS_FILE = "9b4a7f2c.json"  # ← Debe estar en el mismo directorio que el script
+
 
 def cargar_pasos():
     try:
@@ -21,11 +22,11 @@ def cargar_pasos():
         print(f"Error JSON: {e}")
         return []
 
-# === FUNCIÓN DE SCRAPING ===
+
 def obtener_estado(paso):
     url = paso["url"]
     try:
-        resp = requests.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
+        resp = httpx.get(url, timeout=15)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -51,8 +52,8 @@ def obtener_estado(paso):
                 if sibling and isinstance(sibling, str):
                     horario = sibling.strip()
                 break
-                
-        # provincia
+
+        # Provincia
         provincia = None
         strong_prov = soup.find('strong', string=lambda t: t and 'Provincia:' in t)
         if strong_prov:
@@ -60,14 +61,14 @@ def obtener_estado(paso):
             if p_padre:
                 provincia = p_padre.get_text(strip=True).replace('Provincia:', '').strip()
 
-        # país limítrofe
+        # País limítrofe
         pais = None
         strong_pais = soup.find('strong', string=lambda t: t and 'País limítrofe:' in t)
         if strong_pais:
             p_padre = strong_pais.find_parent('p')
             if p_padre:
                 pais = p_padre.get_text(strip=True).replace('País limítrofe:', '').strip()
-                
+
         return {
             "nombre": paso["nombre"],
             "url": url,
@@ -82,39 +83,26 @@ def obtener_estado(paso):
         return {
             "nombre": paso["nombre"],
             "url": url,
-            "provincia": None,
-            "pais": None,
-            "estado": None,
-            "ultima_actualizacion": None,
-            "localidades": None,
-            "horario": None,
             "error": str(e)
         }
 
-# === RUTA PRINCIPAL: devuelve todos los pasos scrapeados ===
-@app.route("/scrapear", methods=["GET"])
-def scrapear_todos():
+
+@app.get("/scrapear")
+async def scrapear_todos():
     pasos = cargar_pasos()
     if not pasos:
-        return jsonify({"error": "No se pudieron cargar los pasos"}), 500
+        return {"error": "No se pudieron cargar los pasos"}
 
     resultados = []
-    with ThreadPoolExecutor(max_workers=20) as executor:
+    with ThreadPoolExecutor(max_workers=30) as executor:
         futures = {executor.submit(obtener_estado, paso): paso for paso in pasos}
         for future in as_completed(futures):
             resultados.append(future.result())
 
     resultados.sort(key=lambda x: x["nombre"])
+    return resultados
 
-    return jsonify(resultados)  # ✅ Devuelve directamente el JSON
 
-# === HEALTH CHECK ===
-@app.route("/")
-def health():
-    return "OK", 200
-
-# === INICIO ===
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
-
+@app.get("/")
+async def health():
+    return {"status": "ok"}
