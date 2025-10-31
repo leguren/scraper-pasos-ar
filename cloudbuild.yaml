@@ -1,16 +1,54 @@
 steps:
-  # Build de la imagen
+  # Paso 1: Construir la imagen Docker
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/mi-imagen:$SHORT_SHA', '.']
+    args:
+      - 'build'
+      - '-t'
+      - '$_IMAGE_NAME:$SHORT_SHA'
+      - '.'
+    id: 'build'
 
-  # Push de la imagen
+  # Paso 2: Push al Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/mi-imagen:$SHORT_SHA']
+    args:
+      - 'push'
+      - '$_IMAGE_NAME:$SHORT_SHA'
+    id: 'push'
 
+  # Paso 3: (Opcional) Desplegar en Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy $_SERVICE_NAME \
+          --image=$_IMAGE_NAME:$SHORT_SHA \
+          --region=$_REGION \
+          --platform=managed \
+          --port=8080 \
+          --allow-unauthenticated \
+          --timeout=300 \
+          --max-instances=10 \
+          --quiet
+    id: 'deploy'
+
+# Imágenes a subir
 images:
-  - 'gcr.io/$PROJECT_ID/southamerica-east1-docker.pkg.dev/pasos-ar/pasos-ar-artifact:$SHORT_SHA'
+  - '$_IMAGE_NAME:$SHORT_SHA'
 
+# Variables de sustitución (definidas en triggers o CLI)
+substitutions:
+  _IMAGE_NAME: 'southamerica-east1-docker.pkg.dev/pasos-ar/pasos-ar-artifact/mi-imagen'
+  _SERVICE_NAME: 'scraper-pasos-ar'
+  _REGION: 'southamerica-east1'
+
+# Opciones globales
 options:
-  default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+  logging: CLOUD_LOGGING_ONLY
 
+# Service Account con permisos
 serviceAccount: 'projects/pasos-ar/serviceAccounts/pasos-ar-sa@pasos-ar.iam.gserviceaccount.com'
+
+# Timeout global del build
+timeout: 1200s
