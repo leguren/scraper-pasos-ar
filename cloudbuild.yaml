@@ -52,3 +52,4 @@ serviceAccount: 'projects/pasos-ar/serviceAccounts/pasos-ar-sa@pasos-ar.iam.gser
 
 # Timeout global del build
 timeout: 1200s
+
