@@ -1,12 +1,12 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/mi-imagen:$SHORT_SHA', '.']
+    args: ['build', '-t', 'us-east1-docker.pkg.dev/$PROJECT_ID/pasos-ar/pasos-ar-artifact:$SHORT_SHA', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/mi-imagen:$SHORT_SHA']
+    args: ['push', 'us-east1-docker.pkg.dev/$PROJECT_ID/pasos-ar/pasos-ar-artifact:$SHORT_SHA']
 
 images:
-  - 'gcr.io/$PROJECT_ID/southamerica-east1-docker.pkg.dev/pasos-ar/pasos-ar-artifact:$SHORT_SHA'
+  - 'us-east1-docker.pkg.dev/$PROJECT_ID/pasos-ar/pasos-ar-artifact:$SHORT_SHA'
 
 options:
   default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
