@@ -19,5 +19,5 @@ ENV PORT=8080
 # Exponemos el puerto
 EXPOSE 8080
 
-# Comando para ejecutar tu app FastAPI
-CMD ["uvicorn", "scraper-pasos-ar:app", "--host", "0.0.0.0", "--port", "8080"]
+# Comando para ejecutar tu app FastAPI con async estable en Cloud Run
+CMD ["uvicorn", "scraper-pasos-ar:app", "--host", "0.0.0.0", "--port", "8080", "--loop", "asyncio", "--http", "h11", "--workers", "1"]
