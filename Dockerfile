@@ -1,23 +1,21 @@
-# Imagen base ligera y compatible con Cloud Run
+# Imagen base ligera
 FROM python:3.12-slim
 
-# Directorio de trabajo
+# Instalar dependencias de sistema necesarias
+RUN apt-get update && apt-get install -y build-essential libffi-dev libssl-dev && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Copiamos dependencias primero para cache de capas
+# Copiar requirements e instalar
 COPY requirements.txt .
-
-# Instalamos dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiamos el proyecto completo
+# Copiar código
 COPY . .
 
-# Puerto para Cloud Run
+# Puerto
 ENV PORT=8080
-
-# Exponemos el puerto
 EXPOSE 8080
 
-# Comando de arranque: usa la variable de entorno $PORT
-CMD ["sh", "-c", "uvicorn scraper-pasos-ar:app --host 0.0.0.0 --port $PORT --workers 1"]
+# CMD optimizado para Cloud Run
+CMD ["uvicorn", "scraper-pasos-ar:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
