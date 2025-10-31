@@ -4,4 +4,4 @@ requests==2.32.3
 beautifulsoup4==4.12.3
 firebase-admin==6.5.0
 google-cloud-storage==2.18.2
-cachetools==5.4.1
+cachetools==5.4.0
