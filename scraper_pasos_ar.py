@@ -18,7 +18,6 @@ cache = {"data": None, "timestamp": None}
 # --- Variable global para pasos precargados ---
 pasos_cache = []
 
-
 # --- Cargar pasos locales ---
 def cargar_pasos():
     try:
@@ -35,7 +34,6 @@ def cargar_pasos():
     except Exception as e:
         print(f"[ERROR] Error cargando pasos: {e}")
         return []
-
 
 # --- Función de scraping asincrónica ---
 async def obtener_estado(paso):
@@ -108,7 +106,6 @@ async def obtener_estado(paso):
                 "error": str(e)
             }
 
-
 # --- Lifespan: carga inicial ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -122,7 +119,6 @@ async def lifespan(app: FastAPI):
     cache["data"] = None
     cache["timestamp"] = None
 
-
 # --- App con lifespan ---
 app = FastAPI(
     title="Scraper Pasos AR",
@@ -130,7 +126,6 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
-
 
 # --- Health check rápido ---
 @app.get("/", response_model=dict)
@@ -141,7 +136,6 @@ async def health():
         "cache_ttl_minutes": 15,
         "timestamp": datetime.now().isoformat()
     }
-
 
 # --- Endpoint principal ---
 @app.get("/scrapear")
@@ -166,5 +160,9 @@ async def scrapear_todos():
 
     print(f"[Scraping] Completado. {len(resultados)} resultados.")
     return JSONResponse(content=resultados)
-    
 
+# --- Bloque para ejecución local ---
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run("scraper_pasos_ar:app", host="0.0.0.0", port=port, log_level="info")
