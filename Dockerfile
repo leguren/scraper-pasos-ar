@@ -1,23 +1,23 @@
-# Imagen base ligera y compatible con Cloud Run
+# Imagen base ligera
 FROM python:3.12-slim
 
-# Directorio de trabajo en el contenedor
+# Directorio de trabajo
 WORKDIR /app
 
-# Copiamos las dependencias primero (para aprovechar la cache de capas)
+# Copiamos dependencias primero para cache de capas
 COPY requirements.txt .
 
 # Instalamos dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiamos el resto del proyecto
+# Copiamos todo el proyecto
 COPY . .
 
 # Variable de entorno para Cloud Run
 ENV PORT=8080
 
-# Exponemos el puerto
+# Exponer puerto
 EXPOSE 8080
 
-# Comando para ejecutar tu app FastAPI con async estable en Cloud Run
-CMD ["uvicorn", "scraper-pasos-ar:app", "--host", "0.0.0.0", "--port", "8080", "--loop", "asyncio", "--http", "h11", "--workers", "1"]
+# Comando para arrancar FastAPI con uvicorn, puerto dinámico
+CMD ["sh", "-c", "uvicorn scraper-pasos-ar:app --host 0.0.0.0 --port $PORT --loop asyncio --http h11 --workers 1"]
