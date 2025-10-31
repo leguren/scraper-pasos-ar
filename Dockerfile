@@ -1,4 +1,4 @@
-# Imagen base ligera
+# Imagen base ligera y compatible con Cloud Run
 FROM python:3.12-slim
 
 # Directorio de trabajo
@@ -10,14 +10,14 @@ COPY requirements.txt .
 # Instalamos dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiamos todo el proyecto
+# Copiamos el proyecto completo
 COPY . .
 
-# Variable de entorno para Cloud Run
+# Puerto para Cloud Run
 ENV PORT=8080
 
-# Exponer puerto
+# Exponemos el puerto
 EXPOSE 8080
 
-# Comando para arrancar FastAPI con uvicorn, puerto dinámico
-CMD ["sh", "-c", "uvicorn scraper-pasos-ar:app --host 0.0.0.0 --port $PORT --loop asyncio --http h11 --workers 1"]
+# Comando de arranque: usa la variable de entorno $PORT
+CMD ["sh", "-c", "uvicorn scraper-pasos-ar:app --host 0.0.0.0 --port $PORT --workers 1"]
