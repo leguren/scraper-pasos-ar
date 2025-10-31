@@ -6,23 +6,36 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import httpx
 from bs4 import BeautifulSoup
+from contextlib import asynccontextmanager
 
-app = FastAPI()
-
-PASOS_FILE = "9b4a7f2c.json"  # Archivo local con datos base de pasos
+# --- Archivo de pasos ---
+PASOS_FILE = "9b4a7f2c.json"
 
 # --- CACHE ---
-CACHE_TTL = timedelta(minutes=15)  # Duración de la cache
+CACHE_TTL = timedelta(minutes=15)
 cache = {"data": None, "timestamp": None}
+
+# --- Variable global para pasos precargados ---
+pasos_cache = []
+
 
 # --- Cargar pasos locales ---
 def cargar_pasos():
     try:
         with open(PASOS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Error cargando pasos: {e}")
+            data = json.load(f)
+            print(f"[Startup] Cargados {len(data)} pasos desde {PASOS_FILE}")
+            return data
+    except FileNotFoundError:
+        print(f"[ERROR] Archivo {PASOS_FILE} no encontrado.")
         return []
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] JSON inválido en {PASOS_FILE}: {e}")
+        return []
+    except Exception as e:
+        print(f"[ERROR] Error cargando pasos: {e}")
+        return []
+
 
 # --- Función de scraping asincrónica ---
 async def obtener_estado(paso):
@@ -95,28 +108,62 @@ async def obtener_estado(paso):
                 "error": str(e)
             }
 
+
+# --- Lifespan: carga inicial ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global pasos_cache
+    pasos_cache = cargar_pasos()
+    if not pasos_cache:
+        print("[WARNING] No se cargaron pasos. El endpoint /scrapear devolverá error.")
+    yield
+    # Limpieza al apagar
+    pasos_cache.clear()
+    cache["data"] = None
+    cache["timestamp"] = None
+
+
+# --- App con lifespan ---
+app = FastAPI(
+    title="Scraper Pasos AR",
+    description="API para obtener estado de pasos fronterizos",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+
+# --- Health check rápido ---
+@app.get("/", response_model=dict)
+async def health():
+    return {
+        "status": "healthy",
+        "pasos_cargados": len(pasos_cache),
+        "cache_ttl_minutes": 15,
+        "timestamp": datetime.now().isoformat()
+    }
+
+
 # --- Endpoint principal ---
 @app.get("/scrapear")
 async def scrapear_todos():
-    # --- Revisar cache ---
+    # Revisar cache
     if cache["data"] and cache["timestamp"] and datetime.now() - cache["timestamp"] < CACHE_TTL:
         return JSONResponse(content=cache["data"])
 
-    pasos = cargar_pasos()
-    if not pasos:
-        return JSONResponse(content={"error": "No se pudieron cargar los pasos"}, status_code=500)
+    if not pasos_cache:
+        return JSONResponse(
+            content={"error": "No se pudieron cargar los pasos base. Revisa logs."},
+            status_code=500
+        )
 
-    # --- Ejecutar scraping en paralelo ---
-    resultados = await asyncio.gather(*(obtener_estado(p) for p in pasos))
+    print(f"[Scraping] Iniciando scraping de {len(pasos_cache)} pasos...")
+    resultados = await asyncio.gather(*(obtener_estado(p) for p in pasos_cache))
     resultados.sort(key=lambda x: x["nombre"])
 
-    # --- Actualizar cache ---
+    # Actualizar cache
     cache["data"] = resultados
     cache["timestamp"] = datetime.now()
 
+    print(f"[Scraping] Completado. {len(resultados)} resultados.")
     return JSONResponse(content=resultados)
-
-# --- Health check ---
-@app.get("/")
-async def health():
-    return "OK"
+    
