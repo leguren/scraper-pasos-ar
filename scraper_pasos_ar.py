@@ -167,3 +167,4 @@ async def scrapear_todos():
     print(f"[Scraping] Completado. {len(resultados)} resultados.")
     return JSONResponse(content=resultados)
     
+
