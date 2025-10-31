@@ -24,3 +24,4 @@ EXPOSE 8080
 
 # --- Comando de inicio ---
 CMD ["uvicorn", "scraper_pasos_ar:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1", "--log-level", "info"]
+
