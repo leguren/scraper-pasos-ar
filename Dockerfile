@@ -1,30 +1,21 @@
-# Imagen base ligera
 FROM python:3.12-slim
 
-# Evita interacciones durante instalación
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Directorio de trabajo
 WORKDIR /app
 
-# Copia solo requirements primero (mejora caché de capas)
 COPY requirements.txt .
-
-# Instala dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia el resto del código
+# Forzar copia del JSON
+COPY 9b4a7f2c.json /app/9b4a7f2c.json
+
 COPY . .
 
-# Expone el puerto (documentación)
+# Debug: listar archivos
+RUN echo "=== CONTENIDO DE /app ===" && ls -la /app
+
 EXPOSE 8080
 
-# Usa la variable PORT inyectada por Cloud Run
-# ${PORT} se expande en tiempo de ejecución
-CMD exec uvicorn scraper_pasos_ar:app \
-    --host 0.0.0.0 \
-    --port ${PORT} \
-    --workers 1 \
-    --log-level info
-    
+CMD ["sh", "-c", "echo 'PUERTO: ${PORT}' && echo 'Iniciando uvicorn...' && exec uvicorn scraper_pasos_ar:app --host 0.0.0.0 --port ${PORT} --workers 1 --log-level info"]
