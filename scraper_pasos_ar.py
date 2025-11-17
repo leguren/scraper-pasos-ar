@@ -8,17 +8,13 @@ import httpx
 from bs4 import BeautifulSoup
 from contextlib import asynccontextmanager
 
-# --- Archivo de pasos ---
 PASOS_FILE = "9b4a7f2c.json"
 
-# --- CACHE ---
 CACHE_TTL = timedelta(minutes=15)
 cache = {"data": None, "timestamp": None}
 
-# --- Variable global para pasos precargados ---
 pasos_cache = []
 
-# --- Cargar pasos locales ---
 def cargar_pasos():
     try:
         with open(PASOS_FILE, "r", encoding="utf-8") as f:
@@ -35,7 +31,6 @@ def cargar_pasos():
         print(f"[ERROR] Error cargando pasos: {e}")
         return []
 
-# --- Función de scraping asincrónica ---
 async def obtener_estado(paso):
     url = paso["url"]
     async with httpx.AsyncClient(timeout=15, headers={"User-Agent": "Mozilla/5.0"}) as client:
@@ -44,20 +39,20 @@ async def obtener_estado(paso):
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, "html.parser")
 
-            # Estado
+            # estado
             estado_span = soup.select_one("span.label.label-danger, span.label.label-success")
             estado = estado_span.get_text(strip=True) if estado_span else None
 
-            # Última actualización
+            # última actualización
             actualizacion_div = soup.select_one("div.text-muted.m-t-3.lead")
             texto_actualizacion = actualizacion_div.get_text(strip=True) if actualizacion_div else None
             ultima_actualizacion = texto_actualizacion.replace(estado, "").strip() if texto_actualizacion and estado else texto_actualizacion
 
-            # Localidades
+            # localidades
             localidades = soup.select_one("h2 > small")
             localidades_text = localidades.get_text(strip=True) if localidades else None
 
-            # Horario
+            # horario
             horario = None
             for p_tag in soup.find_all("p"):
                 strong = p_tag.find("strong")
@@ -67,7 +62,7 @@ async def obtener_estado(paso):
                         horario = sibling.strip()
                     break
 
-            # Provincia
+            # provincia
             provincia = None
             strong_prov = soup.find('strong', string=lambda t: t and 'Provincia:' in t)
             if strong_prov:
@@ -75,7 +70,7 @@ async def obtener_estado(paso):
                 if p_padre:
                     provincia = p_padre.get_text(strip=True).replace('Provincia:', '').strip()
 
-            # País limítrofe
+            # país limítrofe
             pais = None
             strong_pais = soup.find('strong', string=lambda t: t and 'País limítrofe:' in t)
             if strong_pais:
@@ -106,7 +101,6 @@ async def obtener_estado(paso):
                 "error": str(e)
             }
 
-# --- Lifespan: carga inicial ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global pasos_cache
@@ -114,20 +108,18 @@ async def lifespan(app: FastAPI):
     if not pasos_cache:
         print("[WARNING] No se cargaron pasos. El endpoint /scrapear devolverá error.")
     yield
-    # Limpieza al apagar
+
     pasos_cache.clear()
     cache["data"] = None
     cache["timestamp"] = None
 
-# --- App con lifespan ---
 app = FastAPI(
     title="Scraper Pasos AR",
-    description="API para obtener estado de pasos fronterizos",
+    description="API para obtener el estado de los pasos internacionales de Argentina",
     version="1.0.0",
     lifespan=lifespan
 )
 
-# --- Health check rápido ---
 @app.get("/", response_model=dict)
 async def health():
     return {
@@ -137,7 +129,6 @@ async def health():
         "timestamp": datetime.now().isoformat()
     }
 
-# --- Endpoint principal ---
 @app.get("/scrapear")
 async def scrapear_todos():
     # Revisar cache
@@ -161,9 +152,7 @@ async def scrapear_todos():
     print(f"[Scraping] Completado. {len(resultados)} resultados.")
     return JSONResponse(content=resultados)
 
-# --- Bloque para ejecución local ---
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8080))
     uvicorn.run("scraper_pasos_ar:app", host="0.0.0.0", port=port, log_level="info")
-
