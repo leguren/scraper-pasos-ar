@@ -69,9 +69,9 @@ def convertir_schema_a_texto(schema):
     incluye_feriados = "PH" in schema
 
     # -------------------------------------------------
-    # dividir bloques por ;
+    # dividir bloques por ; o coma seguida de espacio
     # -------------------------------------------------
-    bloques = [b.strip() for b in schema.split(";") if b.strip()]
+    bloques = [b.strip() for b in re.split(r"[;,]", schema) if b.strip()]
     textos = []
 
     for bloque in bloques:
@@ -86,7 +86,8 @@ def convertir_schema_a_texto(schema):
             if m:
                 texto_dias = f"de {dias_map[m.group(1)]} a {dias_map[m.group(2)]}"
             else:
-                texto_dias = ""
+                nombres = [dias_map[d] for d in dias_encontrados]
+                texto_dias = ", ".join(nombres[:-1]) + " y " + nombres[-1] if nombres else ""
         else:
             nombres = [dias_map[d] for d in dias_encontrados]
             if len(nombres) == 1:
@@ -173,7 +174,10 @@ async def scrapear():
         if not data:
             continue
 
+        # ---- prioridad: cancillería primero, luego schema original ----
+        hs_canc = data.get("fecha_schema_cancilleria")
         hs_a = data.get("fecha_schema")
+        horario_texto = convertir_schema_a_texto(hs_canc or hs_a)
 
         resultado.append({
             "id": int(paso["id"]),
@@ -182,7 +186,8 @@ async def scrapear():
             "provincia": data.get("provincia"),
             "pais": data.get("pais"),
             "horario_schema_a": hs_a,
-            "horario_texto": convertir_schema_a_texto(hs_a)
+            "horario_schema_b": hs_canc,
+            "horario_texto": horario_texto
         })
 
     resultado.sort(key=lambda x: x["nombre"])
