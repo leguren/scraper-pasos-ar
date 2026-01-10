@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from datetime import datetime, timedelta
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -24,6 +25,43 @@ def cargar_pasos():
     except Exception as e:
         print(f"[ERROR] No se pudieron cargar los pasos: {e}")
         return []
+
+
+def convertir_schema_a_texto(schema):
+    if not schema:
+        return None
+
+    if "CERRADO" in schema.upper():
+        return None
+
+    dias = {
+        "Mo": "lunes",
+        "Tu": "martes",
+        "We": "miércoles",
+        "Th": "jueves",
+        "Fr": "viernes",
+        "Sa": "sábado",
+        "Su": "domingo"
+    }
+
+    match = re.search(
+        r"(Mo|Tu|We|Th|Fr|Sa|Su)"
+        r"(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+"
+        r"(\d{2}:\d{2})-(\d{2}:\d{2})",
+        schema
+    )
+
+    if not match:
+        return None
+
+    dia_inicio, dia_fin, hora_inicio, hora_fin = match.groups()
+
+    if dia_fin:
+        dias_texto = f"de {dias[dia_inicio]} a {dias[dia_fin]}"
+    else:
+        dias_texto = f"los {dias[dia_inicio]}"
+
+    return f"Abierto {dias_texto} de {hora_inicio} a {hora_fin}."
 
 
 async def obtener_datos_listado():
@@ -99,6 +137,8 @@ async def scrapear():
         if not data:
             continue
 
+        horario_schema_b = data.get("fecha_schema_cancilleria")
+
         resultado.append({
             "id": paso_id,
             "nombre": data.get("nombre_paso"),
@@ -106,7 +146,8 @@ async def scrapear():
             "provincia": data.get("provincia"),
             "pais": data.get("pais"),
             "horario_schema_a": data.get("fecha_schema"),
-            "horario_schema_b": data.get("fecha_schema_cancilleria")
+            "horario_schema_b": horario_schema_b,
+            "horario_texto": convertir_schema_a_texto(horario_schema_b)
         })
 
     resultado.sort(key=lambda x: x["nombre"])
