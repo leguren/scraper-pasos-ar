@@ -31,18 +31,19 @@ def convertir_schema_a_texto(schema):
     if not schema:
         return None
 
+    schema_original = schema
     schema = schema.strip()
 
     # 24/7 off → no mostrar nada
-    if schema.lower() == "24/7 off":
+    if "24/7" in schema and "off" in schema.lower():
         return None
 
-    # 24/7 → todos los días, 24 horas
-    if schema == "24/7":
+    # 24/7 abierto (con texto adicional)
+    if "24/7" in schema:
         return "Abierto todos los días las 24 horas."
 
-    if "CERRADO" in schema.upper():
-        return None
+    # eliminar todo lo que esté entre comillas
+    schema = re.sub(r'"[^"]*"', '', schema)
 
     dias = {
         "Mo": "lunes",
@@ -54,10 +55,9 @@ def convertir_schema_a_texto(schema):
         "Su": "domingo"
     }
 
-    texto_dias = ""
     incluye_feriados = "PH" in schema
+    texto_dias = ""
 
-    # detectar rango o lista de días
     match_dias = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?", schema)
     if match_dias:
         d1, d2 = match_dias.groups()
@@ -67,21 +67,14 @@ def convertir_schema_a_texto(schema):
             texto_dias = f"los {dias[d1]}"
 
     if incluye_feriados:
-        if texto_dias:
-            texto_dias += " y feriados"
-        else:
-            texto_dias = "feriados"
+        texto_dias += " y feriados" if texto_dias else "feriados"
 
-    # detectar horarios (puede haber más de un rango)
     rangos = re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", schema)
     if not rangos:
         return None
 
-    partes_horario = []
-    for h1, h2 in rangos:
-        partes_horario.append(f"de {h1} a {h2}")
-
-    texto_horario = " y ".join(partes_horario)
+    partes = [f"de {h1} a {h2}" for h1, h2 in rangos]
+    texto_horario = " y ".join(partes)
 
     return f"Abierto {texto_dias} {texto_horario}."
 
@@ -118,74 +111,35 @@ app = FastAPI(
 )
 
 
-@app.get("/")
-async def health():
-    return {
-        "status": "healthy",
-        "pasos_base": len(pasos_cache),
-        "cache_ttl_minutes": 15,
-        "timestamp": datetime.now().isoformat()
-    }
-
-
 @app.get("/scrapear")
 async def scrapear():
-    # Cache
     if cache["data"] and cache["timestamp"] and datetime.now() - cache["timestamp"] < CACHE_TTL:
         return JSONResponse(content=cache["data"])
 
-    if not pasos_cache:
-        return JSONResponse(
-            content={"error": "No hay pasos base cargados"},
-            status_code=500
-        )
-
-    try:
-        listado = await obtener_datos_listado()
-    except Exception as e:
-        return JSONResponse(
-            content={"error": f"Error obteniendo listado: {e}"},
-            status_code=502
-        )
-
+    listado = await obtener_datos_listado()
     index = {int(p["id"]): p for p in listado if "id" in p}
 
     resultado = []
 
     for paso in pasos_cache:
-        paso_id = int(paso["id"])
-        data = index.get(paso_id)
-
+        data = index.get(int(paso["id"]))
         if not data:
             continue
 
-        horario_schema_b = data.get("fecha_schema_cancilleria")
+        hs_b = data.get("fecha_schema_cancilleria")
 
         resultado.append({
-            "id": paso_id,
+            "id": int(paso["id"]),
             "nombre": data.get("nombre_paso"),
             "estado": data.get("estado_prioridad"),
             "provincia": data.get("provincia"),
             "pais": data.get("pais"),
             "horario_schema_a": data.get("fecha_schema"),
-            "horario_schema_b": horario_schema_b,
-            "horario_texto": convertir_schema_a_texto(horario_schema_b)
+            "horario_schema_b": hs_b,
+            "horario_texto": convertir_schema_a_texto(hs_b)
         })
 
     resultado.sort(key=lambda x: x["nombre"])
-
     cache["data"] = resultado
     cache["timestamp"] = datetime.now()
-
     return JSONResponse(content=resultado)
-
-
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8080))
-    uvicorn.run(
-        "scraper_pasos_ar:app",
-        host="0.0.0.0",
-        port=port,
-        log_level="info"
-    )
