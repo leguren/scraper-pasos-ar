@@ -31,94 +31,6 @@ def normalizar_nombre(nombre: str) -> str:
     return re.sub(r"\s+", " ", nombre.strip().lower())
 
 
-def convertir_schema_a_texto(schema):
-    if not schema:
-        return None
-
-    schema = schema.strip()
-
-    # -------------------------------------------------
-    # 1) TEXTO NO SCHEMA → copiar literal
-    # -------------------------------------------------
-    if not re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su|PH|24/7)", schema):
-        return schema
-
-    # -------------------------------------------------
-    # eliminar aclaraciones entre comillas
-    # -------------------------------------------------
-    schema = re.sub(r'"[^"]*"', '', schema).strip()
-
-    # -------------------------------------------------
-    # 24/7
-    # -------------------------------------------------
-    if "24/7" in schema:
-        if "off" in schema.lower():
-            return None
-        return "Abierto todos los días las 24 horas."
-
-    dias_map = {
-        "Mo": "lunes",
-        "Tu": "martes",
-        "We": "miércoles",
-        "Th": "jueves",
-        "Fr": "viernes",
-        "Sa": "sábado",
-        "Su": "domingo"
-    }
-
-    incluye_feriados = "PH" in schema
-
-    # -------------------------------------------------
-    # dividir bloques por ; o coma seguida de espacio
-    # -------------------------------------------------
-    bloques = [b.strip() for b in re.split(r"[;,]", schema) if b.strip()]
-    textos = []
-
-    for bloque in bloques:
-        dias_encontrados = re.findall(r"(Mo|Tu|We|Th|Fr|Sa|Su)", bloque)
-        dias_encontrados = list(dict.fromkeys(dias_encontrados))
-
-        # ---- DÍAS ----
-        if set(dias_encontrados) == set(dias_map.keys()):
-            texto_dias = "todos los días"
-        elif "-" in bloque:
-            m = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su)", bloque)
-            if m:
-                texto_dias = f"de {dias_map[m.group(1)]} a {dias_map[m.group(2)]}"
-            else:
-                nombres = [dias_map[d] for d in dias_encontrados]
-                texto_dias = ", ".join(nombres[:-1]) + " y " + nombres[-1] if nombres else ""
-        else:
-            nombres = [dias_map[d] for d in dias_encontrados]
-            if len(nombres) == 1:
-                texto_dias = f"los {nombres[0]}"
-            elif len(nombres) == 2:
-                texto_dias = f"{nombres[0]} y {nombres[1]}"
-            else:
-                texto_dias = ", ".join(nombres[:-1]) + " y " + nombres[-1]
-
-        if incluye_feriados:
-            texto_dias += " y feriados"
-
-        # ---- HORARIOS ----
-        rangos = re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", bloque)
-        if not rangos:
-            continue
-
-        partes = [f"de {h1} a {h2}" for h1, h2 in rangos]
-        texto_horario = " y ".join(partes)
-
-        textos.append(f"{texto_dias} {texto_horario}".strip())
-
-    if not textos:
-        return None
-
-    if len(textos) == 1:
-        return f"Abierto {textos[0]}."
-    else:
-        return "Abierto " + ". ".join(textos) + "."
-
-
 async def obtener_datos_listado():
     async with httpx.AsyncClient(
         timeout=httpx.Timeout(30.0),
@@ -174,10 +86,9 @@ async def scrapear():
         if not data:
             continue
 
-        # ---- prioridad: cancillería primero, luego schema original ----
-        hs_canc = data.get("fecha_schema_cancilleria")
+        # ---- solo recopilamos schema y schema cancillería ----
         hs_a = data.get("fecha_schema")
-        horario_texto = convertir_schema_a_texto(hs_canc or hs_a)
+        hs_canc = data.get("fecha_schema_cancilleria")
 
         resultado.append({
             "id": int(paso["id"]),
@@ -187,7 +98,7 @@ async def scrapear():
             "pais": data.get("pais"),
             "horario_schema_a": hs_a,
             "horario_schema_b": hs_canc,
-            "horario_texto": horario_texto
+            "horario_texto": None  # ya no procesamos el schema a texto
         })
 
     resultado.sort(key=lambda x: x["nombre"])
