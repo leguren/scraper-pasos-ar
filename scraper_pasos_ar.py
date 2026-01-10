@@ -27,6 +27,10 @@ def cargar_pasos():
         return []
 
 
+def normalizar_nombre(nombre: str) -> str:
+    return re.sub(r"\s+", " ", nombre.strip().lower())
+
+
 def convertir_schema_a_texto(schema):
     if not schema:
         return None
@@ -152,12 +156,20 @@ async def scrapear():
         return JSONResponse(content=cache["data"])
 
     listado = await obtener_datos_listado()
-    index = {int(p["id"]): p for p in listado if "id" in p}
+
+    # ---- índice por nombre del paso ----
+    index = {
+        normalizar_nombre(p["nombre_paso"]): p
+        for p in listado
+        if p.get("nombre_paso")
+    }
 
     resultado = []
 
     for paso in pasos_cache:
-        data = index.get(int(paso["id"]))
+        nombre_norm = normalizar_nombre(paso["nombre"])
+        data = index.get(nombre_norm)
+
         if not data:
             continue
 
