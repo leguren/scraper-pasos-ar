@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import httpx
-from bs4 import BeautifulSoup
 from contextlib import asynccontextmanager
 
 PASOS_FILE = "9b4a7f2c.json"
@@ -32,23 +31,13 @@ async def obtener_datos_listado():
         timeout=httpx.Timeout(30.0),
         headers={
             "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json",
             "Accept-Language": "es-AR,es;q=0.9"
         }
     ) as client:
         resp = await client.get(LISTADO_URL)
         resp.raise_for_status()
-
-        soup = BeautifulSoup(resp.text, "html.parser")
-
-        script = soup.find("script", string=lambda t: t and "nombre_paso" in t)
-        if not script:
-            raise RuntimeError("No se encontró el dataset embebido en el listado")
-
-        texto = script.string
-        inicio = texto.find("[")
-        fin = texto.rfind("]") + 1
-
-        return json.loads(texto[inicio:fin])
+        return resp.json()   # ← ES JSON DIRECTO
 
 
 @asynccontextmanager
@@ -81,6 +70,7 @@ async def health():
 
 @app.get("/scrapear")
 async def scrapear():
+    # Cache
     if cache["data"] and cache["timestamp"] and datetime.now() - cache["timestamp"] < CACHE_TTL:
         return JSONResponse(content=cache["data"])
 
@@ -98,7 +88,8 @@ async def scrapear():
             status_code=502
         )
 
-    index = {int(p["id"]): p for p in listado}
+    # Indexar por ID
+    index = {int(p["id"]): p for p in listado if "id" in p}
 
     resultado = []
 
@@ -114,7 +105,7 @@ async def scrapear():
             "nombre": data.get("nombre_paso"),
             "estado": data.get("estado_prioridad"),
             "provincia": data.get("provincia"),
-            "pais_limitrofe": data.get("pais"),
+            "pais": data.get("pais"),
             "horario": data.get("fecha_schema")
         })
 
