@@ -26,22 +26,31 @@ def cargar_pasos():
         print(f"[ERROR] No se pudieron cargar los pasos: {e}")
         return []
 
+
 def convertir_schema_a_texto(schema):
     if not schema:
         return None
 
     schema = schema.strip()
 
-    # 24/7 off → no mostrar nada
-    if "24/7" in schema and "off" in schema.lower():
-        return None
+    # -------------------------------------------------
+    # 1) TEXTO NO SCHEMA → copiar literal
+    # -------------------------------------------------
+    if not re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su|PH|24/7)", schema):
+        return schema
 
-    # 24/7 abierto
+    # -------------------------------------------------
+    # eliminar aclaraciones entre comillas
+    # -------------------------------------------------
+    schema = re.sub(r'"[^"]*"', '', schema).strip()
+
+    # -------------------------------------------------
+    # 24/7
+    # -------------------------------------------------
     if "24/7" in schema:
+        if "off" in schema.lower():
+            return None
         return "Abierto todos los días las 24 horas."
-
-    # eliminar aclaraciones entre comillas (schema impuro)
-    schema = re.sub(r'"[^"]*"', '', schema)
 
     dias_map = {
         "Mo": "lunes",
@@ -55,34 +64,27 @@ def convertir_schema_a_texto(schema):
 
     incluye_feriados = "PH" in schema
 
-    # ---- DÍAS ----
-    texto_dias = ""
+    # -------------------------------------------------
+    # dividir bloques por ;
+    # -------------------------------------------------
+    bloques = [b.strip() for b in schema.split(";") if b.strip()]
+    textos = []
 
-    # 1) lista separada por comas: Mo,We,Fr
-    lista_dias = re.findall(r"(Mo|Tu|We|Th|Fr|Sa|Su)", schema)
+    for bloque in bloques:
+        dias_encontrados = re.findall(r"(Mo|Tu|We|Th|Fr|Sa|Su)", bloque)
+        dias_encontrados = list(dict.fromkeys(dias_encontrados))
 
-    if lista_dias:
-        # eliminar duplicados manteniendo orden
-        vistos = []
-        for d in lista_dias:
-            if d not in vistos:
-                vistos.append(d)
-
-        # todos los días
-        if set(vistos) == set(dias_map.keys()):
+        # ---- DÍAS ----
+        if set(dias_encontrados) == set(dias_map.keys()):
             texto_dias = "todos los días"
-        # rango corrido Mo-Su, Mo-Fr, etc.
-        elif "-" in schema:
-            match_rango = re.search(
-                r"(Mo|Tu|We|Th|Fr|Sa|Su)\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su)",
-                schema
-            )
-            if match_rango:
-                d1, d2 = match_rango.groups()
-                texto_dias = f"de {dias_map[d1]} a {dias_map[d2]}"
-        # lista no corrida
+        elif "-" in bloque:
+            m = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su)", bloque)
+            if m:
+                texto_dias = f"de {dias_map[m.group(1)]} a {dias_map[m.group(2)]}"
+            else:
+                texto_dias = ""
         else:
-            nombres = [dias_map[d] for d in vistos]
+            nombres = [dias_map[d] for d in dias_encontrados]
             if len(nombres) == 1:
                 texto_dias = f"los {nombres[0]}"
             elif len(nombres) == 2:
@@ -90,18 +92,27 @@ def convertir_schema_a_texto(schema):
             else:
                 texto_dias = ", ".join(nombres[:-1]) + " y " + nombres[-1]
 
-    if incluye_feriados:
-        texto_dias += " y feriados" if texto_dias else "feriados"
+        if incluye_feriados:
+            texto_dias += " y feriados"
 
-    # ---- HORARIOS ----
-    rangos = re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", schema)
-    if not rangos:
+        # ---- HORARIOS ----
+        rangos = re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", bloque)
+        if not rangos:
+            continue
+
+        partes = [f"de {h1} a {h2}" for h1, h2 in rangos]
+        texto_horario = " y ".join(partes)
+
+        textos.append(f"{texto_dias} {texto_horario}".strip())
+
+    if not textos:
         return None
 
-    partes = [f"de {h1} a {h2}" for h1, h2 in rangos]
-    texto_horario = " y ".join(partes)
+    if len(textos) == 1:
+        return f"Abierto {textos[0]}."
+    else:
+        return "Abierto " + ". ".join(textos) + "."
 
-    return f"Abierto {texto_dias} {texto_horario}."
 
 async def obtener_datos_listado():
     async with httpx.AsyncClient(
@@ -150,19 +161,19 @@ async def scrapear():
         if not data:
             continue
 
+        hs_a = data.get("fecha_schema")
+
         resultado.append({
             "id": int(paso["id"]),
             "nombre": data.get("nombre_paso"),
             "estado": data.get("estado_prioridad"),
             "provincia": data.get("provincia"),
             "pais": data.get("pais"),
-            "horario_schema_a": data.get("fecha_schema"),
-            "horario_schema_b": data.get("fecha_schema_cancilleria"),
-            "horario_texto": convertir_schema_a_texto(data.get("fecha_schema"))
+            "horario_schema_a": hs_a,
+            "horario_texto": convertir_schema_a_texto(hs_a)
         })
 
     resultado.sort(key=lambda x: x["nombre"])
     cache["data"] = resultado
     cache["timestamp"] = datetime.now()
     return JSONResponse(content=resultado)
-
