@@ -31,108 +31,114 @@ def normalizar_nombre(nombre: str) -> str:
 def convertir_schema_a_texto(schema: str) -> str:
     if not schema or not schema.strip():
         return None
+
     schema = schema.strip()
 
+    # -------------------------------------------------
     # 24/7
+    # -------------------------------------------------
     if "24/7" in schema:
-        if "off" in schema.lower():
+        if re.search(r'24/7\s*off', schema, re.IGNORECASE):
             aclaraciones = re.findall(r'"([^"]+)"', schema)
-            return (". ".join(aclaraciones) + ". Feriados cerrado.") if aclaraciones else "Cerrado"
-        texto = "Abierto todos los días las 24 horas."
-        aclaraciones = re.findall(r'"([^"]+)"', schema)
-        if aclaraciones:
-            texto += " " + " ".join(aclaraciones)
-        return texto
+            texto = ". ".join(aclaraciones) + ". Feriados cerrado." if aclaraciones else "Cerrado"
+            return texto
+        else:
+            texto = "Abierto todos los días las 24 horas."
+            aclaraciones = re.findall(r'"([^"]+)"', schema)
+            if aclaraciones:
+                texto += " " + " ".join(aclaraciones)
+            return texto
 
     dias_map = {
         "Mo": "lunes", "Tu": "martes", "We": "miércoles",
         "Th": "jueves", "Fr": "viernes", "Sa": "sábado", "Su": "domingo"
     }
 
-    # dividir por ;
     bloques = [b.strip() for b in schema.split(";") if b.strip()]
     textos = []
 
     for bloque in bloques:
-        # separar aclaraciones literales
+        # separar aclaraciones
         aclaraciones = re.findall(r'"([^"]+)"', bloque)
         bloque_sin_aclaraciones = re.sub(r'"[^"]*"', '', bloque).strip()
+
         if not bloque_sin_aclaraciones and not aclaraciones:
             continue
 
-        incluye_feriados = "PH" in bloque_sin_aclaraciones or "PH" in bloque
+        # PH off
+        ph_off = bool(re.search(r'PH\s*off', bloque, re.IGNORECASE))
 
-        # separar días y horarios
-        partes = bloque_sin_aclaraciones.split()
-        dias_raw = []
-        rangos = []
+        # dividir por espacios
+        tokens = bloque_sin_aclaraciones.split()
+        dias_tokens = []
+        horarios_tokens = []
 
-        for p in partes:
-            if re.match(r"(Mo|Tu|We|Th|Fr|Sa|Su|PH)", p):
-                dias_raw.extend(p.split(","))
-            elif re.match(r"\d{2}:\d{2}-\d{2}:\d{2}", p):
-                rangos.append(p)
+        for t in tokens:
+            if re.match(r"(Mo|Tu|We|Th|Fr|Sa|Su|PH)(-[Mo|Tu|We|Th|Fr|Sa|Su])?", t) or ',' in t:
+                dias_tokens.append(t)
+            elif re.match(r"\d{2}:\d{2}-\d{2}:\d{2}", t):
+                horarios_tokens.append(t)
 
-        dias_raw = [d for d in dias_raw if d in dias_map or d == "PH"]
-
-        texto_dias = ""
-        if dias_raw:
-            dias_trad = []
-            for d in dias_raw:
-                if d == "PH":
-                    continue
-                dias_trad.append(dias_map[d])
-            if set(dias_trad) == set(dias_map.values()):
-                texto_dias = "todos los días"
-            elif len(dias_trad) == 1:
-                texto_dias = dias_trad[0]
-            elif len(dias_trad) == 2:
-                texto_dias = dias_trad[0] + " y " + dias_trad[1]
-            elif dias_trad:
-                texto_dias = ", ".join(dias_trad[:-1]) + " y " + dias_trad[-1]
-
-        if incluye_feriados:
-            if texto_dias:
-                texto_dias += " y feriados"
-            else:
-                texto_dias = "Feriados"
-
-        # construir bloque de horarios
-        texto_horario = ""
-        for h in rangos:
-            try:
-                hi, hf = h.split("-")
-                if texto_horario:
-                    texto_horario += " y "
-                texto_horario += f"de {hi} a {hf}"
-            except Exception:
+        # construir texto de días
+        dias = []
+        for d in dias_tokens:
+            if '-' in d:  # rango Mo-Fr
+                m = re.match(r"(Mo|Tu|We|Th|Fr|Sa|Su)-(Mo|Tu|We|Th|Fr|Sa|Su)", d)
+                if m:
+                    dias.append(f"de {dias_map[m.group(1)]} a {dias_map[m.group(2)]}")
+            elif ',' in d:  # Mo,We,Fr
+                subdias = d.split(',')
+                nombres = [dias_map[s] for s in subdias if s in dias_map]
+                if len(nombres) == 1:
+                    dias.append(nombres[0])
+                elif len(nombres) == 2:
+                    dias.append(f"{nombres[0]} y {nombres[1]}")
+                else:
+                    dias.append(", ".join(nombres[:-1]) + " y " + nombres[-1])
+            elif d in dias_map:  # día suelto
+                dias.append(dias_map[d])
+            elif d == "PH":
                 continue
 
-        bloque_final = ""
-        if texto_dias and texto_horario:
-            bloque_final = f"{texto_dias} {texto_horario}"
-        elif texto_horario:
-            bloque_final = texto_horario
-        elif texto_dias:
-            bloque_final = texto_dias
+        # PH en texto
+        texto_ph = "Feriados" if "PH" in bloque_sin_aclaraciones and not ph_off else ""
+        if ph_off:
+            texto_ph += " cerrado"
 
+        # construir texto de horarios
+        texto_horarios = []
+        for h in horarios_tokens:
+            hi, hf = h.split("-")
+            texto_horarios.append(f"de {hi} a {hf}")
+        texto_horarios = " y ".join(texto_horarios)
+
+        # unir días + horarios
+        bloque_texto = ""
+        if dias:
+            bloque_texto += " de ".join(dias) if len(dias)==1 else " y ".join(dias)
+            if texto_horarios:
+                bloque_texto += f" {texto_horarios}"
+        else:
+            bloque_texto += texto_horarios
+
+        # agregar aclaraciones
         if aclaraciones:
-            if bloque_final:
-                bloque_final += ". "
-            bloque_final += " ".join(aclaraciones)
+            if bloque_texto:
+                bloque_texto += ". "
+            bloque_texto += " ".join(aclaraciones)
 
-        # PH off explícito
-        if re.search(r'PH\s*off', bloque, re.IGNORECASE):
-            if bloque_final:
-                bloque_final += ". "
-            bloque_final += "Feriados cerrado."
+        # agregar PH off si corresponde
+        if ph_off:
+            if bloque_texto:
+                bloque_texto += ". "
+            bloque_texto += "Feriados cerrado."
 
-        if bloque_final:
-            textos.append(bloque_final.strip())
+        textos.append(bloque_texto.strip())
 
     if not textos:
         return None
 
+    # unir todos los bloques
     return "Abierto " + ". ".join(textos) + "."
 
 async def obtener_datos_listado():
@@ -205,5 +211,6 @@ async def scrapear():
     cache["data"] = resultado
     cache["timestamp"] = datetime.now()
     return JSONResponse(content=resultado)
+
 
 
