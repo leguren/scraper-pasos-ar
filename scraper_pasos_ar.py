@@ -40,43 +40,34 @@ async def obtener_estado(paso):
             soup = BeautifulSoup(resp.text, "html.parser")
 
             # estado
-            estado_span = soup.select_one("span.label.label-danger, span.label.label-success")
-            estado = estado_span.get_text(strip=True) if estado_span else None
+            estado_div = soup.select_one("#estado")
+            estado = estado_div.get_text(strip=True) if estado_div else None
 
             # última actualización
-            actualizacion_div = soup.select_one("div.text-muted.m-t-3.lead")
-            texto_actualizacion = actualizacion_div.get_text(strip=True) if actualizacion_div else None
-            ultima_actualizacion = texto_actualizacion.replace(estado, "").strip() if texto_actualizacion and estado else texto_actualizacion
-
-            # localidades
-            localidades = soup.select_one("h2 > small")
-            localidades_text = localidades.get_text(strip=True) if localidades else None
-
-            # horario
-            horario = None
-            for p_tag in soup.find_all("p"):
-                strong = p_tag.find("strong")
-                if strong and "Horarios de atención" in strong.get_text():
-                    sibling = strong.next_sibling
-                    if sibling and isinstance(sibling, str):
-                        horario = sibling.strip()
+            ultima_actualizacion = None
+            for li in soup.find_all("li"):
+                texto = li.get_text(strip=True)
+                if "última actualización" in texto:
+                    ultima_actualizacion = texto
                     break
 
-            # provincia
-            provincia = None
-            strong_prov = soup.find('strong', string=lambda t: t and 'Provincia:' in t)
-            if strong_prov:
-                p_padre = strong_prov.find_parent('p')
-                if p_padre:
-                    provincia = p_padre.get_text(strip=True).replace('Provincia:', '').strip()
+            # localidades
+            localidades = soup.select_one("h3 small")
+            localidades_text = localidades.get_text(" ", strip=True) if localidades else None
 
-            # país limítrofe
+            # horario (pendiente)
+            horario = None
+
+            # provincia y país limítrofe
+            provincia = None
             pais = None
-            strong_pais = soup.find('strong', string=lambda t: t and 'País limítrofe:' in t)
-            if strong_pais:
-                p_padre = strong_pais.find_parent('p')
-                if p_padre:
-                    pais = p_padre.get_text(strip=True).replace('País limítrofe:', '').strip()
+            lado_p = soup.select_one("p.lado")
+            if lado_p:
+                texto = lado_p.get_text(" ", strip=True)
+                if "Lado argentino:" in texto:
+                    provincia = texto.split("Lado argentino:")[1].split("|")[0].strip()
+                if "País limítrofe:" in texto:
+                    pais = texto.split("País limítrofe:")[1].strip()
 
             return {
                 "nombre": paso["nombre"],
