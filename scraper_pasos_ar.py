@@ -33,7 +33,16 @@ def cargar_pasos():
 
 async def obtener_estado(paso):
     url = paso["url"]
-    async with httpx.AsyncClient(timeout=15, headers={"User-Agent": "Mozilla/5.0"}) as client:
+    async with httpx.AsyncClient(
+        timeout=httpx.Timeout(30.0),
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "es-AR,es;q=0.9",
+            "Connection": "keep-alive",
+        },
+        follow_redirects=True
+    ) as client:
         try:
             resp = await client.get(url)
             resp.raise_for_status()
@@ -79,6 +88,7 @@ async def obtener_estado(paso):
                 "localidades": localidades_text,
                 "horario": horario
             }
+
         except Exception as e:
             return {
                 "nombre": paso["nombre"],
