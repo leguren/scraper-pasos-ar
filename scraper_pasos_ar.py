@@ -31,6 +31,16 @@ def convertir_schema_a_texto(schema):
     if not schema:
         return None
 
+    schema = schema.strip()
+
+    # 24/7 off → no mostrar nada
+    if schema.lower() == "24/7 off":
+        return None
+
+    # 24/7 → todos los días, 24 horas
+    if schema == "24/7":
+        return "Abierto todos los días las 24 horas."
+
     if "CERRADO" in schema.upper():
         return None
 
@@ -44,24 +54,36 @@ def convertir_schema_a_texto(schema):
         "Su": "domingo"
     }
 
-    match = re.search(
-        r"(Mo|Tu|We|Th|Fr|Sa|Su)"
-        r"(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+"
-        r"(\d{2}:\d{2})-(\d{2}:\d{2})",
-        schema
-    )
+    texto_dias = ""
+    incluye_feriados = "PH" in schema
 
-    if not match:
+    # detectar rango o lista de días
+    match_dias = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?", schema)
+    if match_dias:
+        d1, d2 = match_dias.groups()
+        if d2:
+            texto_dias = f"de {dias[d1]} a {dias[d2]}"
+        else:
+            texto_dias = f"los {dias[d1]}"
+
+    if incluye_feriados:
+        if texto_dias:
+            texto_dias += " y feriados"
+        else:
+            texto_dias = "feriados"
+
+    # detectar horarios (puede haber más de un rango)
+    rangos = re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", schema)
+    if not rangos:
         return None
 
-    dia_inicio, dia_fin, hora_inicio, hora_fin = match.groups()
+    partes_horario = []
+    for h1, h2 in rangos:
+        partes_horario.append(f"de {h1} a {h2}")
 
-    if dia_fin:
-        dias_texto = f"de {dias[dia_inicio]} a {dias[dia_fin]}"
-    else:
-        dias_texto = f"los {dias[dia_inicio]}"
+    texto_horario = " y ".join(partes_horario)
 
-    return f"Abierto {dias_texto} de {hora_inicio} a {hora_fin}."
+    return f"Abierto {texto_dias} {texto_horario}."
 
 
 async def obtener_datos_listado():
