@@ -31,19 +31,22 @@ def convertir_schema_a_texto(schema):
     if not schema:
         return None
 
-    schema_original = schema
     schema = schema.strip()
 
-    # 24/7 off → no mostrar nada
+    # texto no schema → copiar literal
+    if not re.search(r"\b(Mo|Tu|We|Th|Fr|Sa|Su|24/7)\b", schema):
+        return schema
+
+    # eliminar aclaraciones
+    schema = re.sub(r'"[^"]*"', '', schema).strip()
+
+    # 24/7 off → no mostrar
     if "24/7" in schema and "off" in schema.lower():
         return None
 
-    # 24/7 abierto (con texto adicional)
+    # 24/7 abierto
     if "24/7" in schema:
         return "Abierto todos los días las 24 horas."
-
-    # eliminar todo lo que esté entre comillas
-    schema = re.sub(r'"[^"]*"', '', schema)
 
     dias = {
         "Mo": "lunes",
@@ -58,18 +61,22 @@ def convertir_schema_a_texto(schema):
     incluye_feriados = "PH" in schema
     texto_dias = ""
 
-    match_dias = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?", schema)
-    if match_dias:
-        d1, d2 = match_dias.groups()
-        if d2:
-            texto_dias = f"de {dias[d1]} a {dias[d2]}"
+    match_rango = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su)", schema)
+    if match_rango:
+        d1, d2 = match_rango.groups()
+        if d1 == "Mo" and d2 == "Su":
+            texto_dias = "todos los días"
         else:
-            texto_dias = f"los {dias[d1]}"
+            texto_dias = f"de {dias[d1]} a {dias[d2]}"
+    else:
+        match_unico = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)", schema)
+        if match_unico:
+            texto_dias = dias[match_unico.group()]
 
     if incluye_feriados:
         texto_dias += " y feriados" if texto_dias else "feriados"
 
-    rangos = re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", schema)
+    rangos = re.findall(r"(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})", schema)
     if not rangos:
         return None
 
@@ -126,8 +133,6 @@ async def scrapear():
         if not data:
             continue
 
-        hs_b = data.get("fecha_schema_cancilleria")
-
         resultado.append({
             "id": int(paso["id"]),
             "nombre": data.get("nombre_paso"),
@@ -135,8 +140,8 @@ async def scrapear():
             "provincia": data.get("provincia"),
             "pais": data.get("pais"),
             "horario_schema_a": data.get("fecha_schema"),
-            "horario_schema_b": hs_b,
-            "horario_texto": convertir_schema_a_texto(hs_b)
+            "horario_schema_b": data.get("fecha_schema_cancilleria"),
+            "horario_texto": convertir_schema_a_texto(data.get("fecha_schema"))
         })
 
     resultado.sort(key=lambda x: x["nombre"])
