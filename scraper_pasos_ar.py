@@ -26,21 +26,13 @@ def cargar_pasos():
         print(f"[ERROR] No se pudieron cargar los pasos: {e}")
         return []
 
-
 def convertir_schema_a_texto(schema):
     if not schema:
         return None
 
     schema = schema.strip()
 
-    # texto no schema → copiar literal
-    if not re.search(r"\b(Mo|Tu|We|Th|Fr|Sa|Su|24/7)\b", schema):
-        return schema
-
-    # eliminar aclaraciones
-    schema = re.sub(r'"[^"]*"', '', schema).strip()
-
-    # 24/7 off → no mostrar
+    # 24/7 off → no mostrar nada
     if "24/7" in schema and "off" in schema.lower():
         return None
 
@@ -48,7 +40,10 @@ def convertir_schema_a_texto(schema):
     if "24/7" in schema:
         return "Abierto todos los días las 24 horas."
 
-    dias = {
+    # eliminar aclaraciones entre comillas (schema impuro)
+    schema = re.sub(r'"[^"]*"', '', schema)
+
+    dias_map = {
         "Mo": "lunes",
         "Tu": "martes",
         "We": "miércoles",
@@ -59,24 +54,47 @@ def convertir_schema_a_texto(schema):
     }
 
     incluye_feriados = "PH" in schema
+
+    # ---- DÍAS ----
     texto_dias = ""
 
-    match_rango = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su)", schema)
-    if match_rango:
-        d1, d2 = match_rango.groups()
-        if d1 == "Mo" and d2 == "Su":
+    # 1) lista separada por comas: Mo,We,Fr
+    lista_dias = re.findall(r"(Mo|Tu|We|Th|Fr|Sa|Su)", schema)
+
+    if lista_dias:
+        # eliminar duplicados manteniendo orden
+        vistos = []
+        for d in lista_dias:
+            if d not in vistos:
+                vistos.append(d)
+
+        # todos los días
+        if set(vistos) == set(dias_map.keys()):
             texto_dias = "todos los días"
+        # rango corrido Mo-Su, Mo-Fr, etc.
+        elif "-" in schema:
+            match_rango = re.search(
+                r"(Mo|Tu|We|Th|Fr|Sa|Su)\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su)",
+                schema
+            )
+            if match_rango:
+                d1, d2 = match_rango.groups()
+                texto_dias = f"de {dias_map[d1]} a {dias_map[d2]}"
+        # lista no corrida
         else:
-            texto_dias = f"de {dias[d1]} a {dias[d2]}"
-    else:
-        match_unico = re.search(r"(Mo|Tu|We|Th|Fr|Sa|Su)", schema)
-        if match_unico:
-            texto_dias = dias[match_unico.group()]
+            nombres = [dias_map[d] for d in vistos]
+            if len(nombres) == 1:
+                texto_dias = f"los {nombres[0]}"
+            elif len(nombres) == 2:
+                texto_dias = f"{nombres[0]} y {nombres[1]}"
+            else:
+                texto_dias = ", ".join(nombres[:-1]) + " y " + nombres[-1]
 
     if incluye_feriados:
         texto_dias += " y feriados" if texto_dias else "feriados"
 
-    rangos = re.findall(r"(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})", schema)
+    # ---- HORARIOS ----
+    rangos = re.findall(r"(\d{2}:\d{2})-(\d{2}:\d{2})", schema)
     if not rangos:
         return None
 
@@ -84,7 +102,6 @@ def convertir_schema_a_texto(schema):
     texto_horario = " y ".join(partes)
 
     return f"Abierto {texto_dias} {texto_horario}."
-
 
 async def obtener_datos_listado():
     async with httpx.AsyncClient(
@@ -148,3 +165,4 @@ async def scrapear():
     cache["data"] = resultado
     cache["timestamp"] = datetime.now()
     return JSONResponse(content=resultado)
+
