@@ -37,7 +37,7 @@ async def obtener_datos_listado():
     ) as client:
         resp = await client.get(LISTADO_URL)
         resp.raise_for_status()
-        return resp.json()   # ← ES JSON DIRECTO
+        return resp.json()
 
 
 @asynccontextmanager
@@ -53,7 +53,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Pasos Internacionales AR",
     description="API basada en el listado oficial de pasos internacionales",
-    version="2.0.0",
+    version="2.1.0",
     lifespan=lifespan
 )
 
@@ -88,7 +88,6 @@ async def scrapear():
             status_code=502
         )
 
-    # Indexar por ID
     index = {int(p["id"]): p for p in listado if "id" in p}
 
     resultado = []
@@ -106,7 +105,8 @@ async def scrapear():
             "estado": data.get("estado_prioridad"),
             "provincia": data.get("provincia"),
             "pais": data.get("pais"),
-            "horario": data.get("fecha_schema")
+            "horario_schema_a": data.get("fecha_schema"),
+            "horario_schema_b": data.get("fecha_schema_cancilleria")
         })
 
     resultado.sort(key=lambda x: x["nombre"])
