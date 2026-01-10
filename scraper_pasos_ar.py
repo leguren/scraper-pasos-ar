@@ -15,6 +15,8 @@ cache = {"data": None, "timestamp": None}
 
 pasos_cache = []
 
+SEM = asyncio.Semaphore(3)
+
 def cargar_pasos():
     try:
         with open(PASOS_FILE, "r", encoding="utf-8") as f:
@@ -33,74 +35,80 @@ def cargar_pasos():
 
 async def obtener_estado(paso):
     url = paso["url"]
-    async with httpx.AsyncClient(
-        timeout=httpx.Timeout(30.0),
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            "Accept-Language": "es-AR,es;q=0.9",
-            "Connection": "keep-alive",
-        },
-        follow_redirects=True
-    ) as client:
-        try:
-            resp = await client.get(url)
-            resp.raise_for_status()
-            soup = BeautifulSoup(resp.text, "html.parser")
 
-            # estado
-            estado_div = soup.select_one("#estado")
-            estado = estado_div.get_text(strip=True) if estado_div else None
+    async with SEM:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(30.0),
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "es-AR,es;q=0.9",
+                "Connection": "keep-alive",
+            },
+            follow_redirects=True
+        ) as client:
 
-            # última actualización
-            ultima_actualizacion = None
-            for li in soup.find_all("li"):
-                texto = li.get_text(strip=True)
-                if "última actualización" in texto:
-                    ultima_actualizacion = texto
-                    break
+            for intento in range(3):
+                try:
+                    resp = await client.get(url)
+                    resp.raise_for_status()
+                    soup = BeautifulSoup(resp.text, "html.parser")
 
-            # localidades
-            localidades = soup.select_one("h3 small")
-            localidades_text = localidades.get_text(" ", strip=True) if localidades else None
+                    # estado
+                    estado_div = soup.select_one("#estado")
+                    estado = estado_div.get_text(strip=True) if estado_div else None
 
-            # horario (pendiente)
-            horario = None
+                    # última actualización
+                    ultima_actualizacion = None
+                    for li in soup.find_all("li"):
+                        texto = li.get_text(strip=True)
+                        if "última actualización" in texto:
+                            ultima_actualizacion = texto
+                            break
 
-            # provincia y país limítrofe
-            provincia = None
-            pais = None
-            lado_p = soup.select_one("p.lado")
-            if lado_p:
-                texto = lado_p.get_text(" ", strip=True)
-                if "Lado argentino:" in texto:
-                    provincia = texto.split("Lado argentino:")[1].split("|")[0].strip()
-                if "País limítrofe:" in texto:
-                    pais = texto.split("País limítrofe:")[1].strip()
+                    # localidades
+                    localidades = soup.select_one("h3 small")
+                    localidades_text = localidades.get_text(" ", strip=True) if localidades else None
 
-            return {
-                "nombre": paso["nombre"],
-                "url": url,
-                "provincia": provincia,
-                "pais": pais,
-                "estado": estado,
-                "ultima_actualizacion": ultima_actualizacion,
-                "localidades": localidades_text,
-                "horario": horario
-            }
+                    # horario (pendiente)
+                    horario = None
 
-        except Exception as e:
-            return {
-                "nombre": paso["nombre"],
-                "url": url,
-                "provincia": None,
-                "pais": None,
-                "estado": None,
-                "ultima_actualizacion": None,
-                "localidades": None,
-                "horario": None,
-                "error": str(e)
-            }
+                    # provincia y país limítrofe
+                    provincia = None
+                    pais = None
+                    lado_p = soup.select_one("p.lado")
+                    if lado_p:
+                        texto = lado_p.get_text(" ", strip=True)
+                        if "Lado argentino:" in texto:
+                            provincia = texto.split("Lado argentino:")[1].split("|")[0].strip()
+                        if "País limítrofe:" in texto:
+                            pais = texto.split("País limítrofe:")[1].strip()
+
+                    return {
+                        "nombre": paso["nombre"],
+                        "url": url,
+                        "provincia": provincia,
+                        "pais": pais,
+                        "estado": estado,
+                        "ultima_actualizacion": ultima_actualizacion,
+                        "localidades": localidades_text,
+                        "horario": horario
+                    }
+
+                except Exception as e:
+                    if intento == 2:
+                        return {
+                            "nombre": paso["nombre"],
+                            "url": url,
+                            "provincia": None,
+                            "pais": None,
+                            "estado": None,
+                            "ultima_actualizacion": None,
+                            "localidades": None,
+                            "horario": None,
+                            "error": str(e)
+                        }
+                    await asyncio.sleep(1.5)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -157,3 +165,4 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8080))
     uvicorn.run("scraper_pasos_ar:app", host="0.0.0.0", port=port, log_level="info")
+
