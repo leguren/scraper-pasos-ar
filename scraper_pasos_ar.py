@@ -126,7 +126,6 @@ async def scrapear():
         if not data:
             continue
 
-        hs_a = data.get("fecha_schema")
         hs_b = data.get("fecha_schema_cancilleria")
 
         resultado.append({
@@ -135,13 +134,12 @@ async def scrapear():
             "estado": data.get("estado_prioridad"),
             "provincia": data.get("provincia"),
             "pais": data.get("pais"),
-            "horario_schema_a": hs_a,
+            "horario_schema_a": data.get("fecha_schema"),
             "horario_schema_b": hs_b,
-            "horario_texto": convertir_schema_a_texto(hs_a)
+            "horario_texto": convertir_schema_a_texto(hs_b)
         })
 
     resultado.sort(key=lambda x: x["nombre"])
     cache["data"] = resultado
     cache["timestamp"] = datetime.now()
     return JSONResponse(content=resultado)
-
