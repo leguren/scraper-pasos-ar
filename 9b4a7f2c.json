@@ -17,7 +17,7 @@
     },
     {
         "nombre": "Cajón del Maipo",
-        "localidades": ""
+        "localidades": null
     },
     {
         "nombre": "Cardenal Antonio Samoré",
@@ -97,7 +97,7 @@
     },
     {
         "nombre": "Integración - Planalto",
-        "localidades": ""
+        "localidades": null
     },
     {
         "nombre": "Isleta - Paraje Rojas Silva",
@@ -476,3 +476,4 @@
         "localidades": "Ituzaingó (AR) – Ayolas (PY)"
     }
 ]
+
