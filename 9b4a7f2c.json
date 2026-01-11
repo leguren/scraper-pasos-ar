@@ -1,478 +1,478 @@
 [    
     {
         "nombre": "Agua Negra",
-        "id": "27"
+        "localidades": "Las Flores (AR) – Huanta (CL)"
     },
     {
         "nombre": "Aguas Blancas - Bermejo",
-        "id": "23"
+        "localidades": "Aguas Blancas (AR) – Bermejo (BO)"
     },
     {
         "nombre": "Bernardo de Irigoyen - Dionisio Cerqueira",
-        "id": "12"
+        "localidades": "Bernardo de Irigoyen (AR) – Dionisio Cerqueira (BR)"
     },
     {
         "nombre": "Andresito - Capanema",
-        "id": "8"
+        "localidades": "Comandante Andresito (AR) – Capanema (BR)"
     },
     {
         "nombre": "Cajón del Maipo",
-        "id": "96"
+        "localidades": ""
     },
     {
         "nombre": "Cardenal Antonio Samoré",
-        "id": "42"
+        "localidades": "Villa La Angostura (AR) – Entre Lagos (CL)"
     },
     {
         "nombre": "Carirriñe",
-        "id": "41"
+        "localidades": "Junín de los Andes (AR) – Liquiñe (CL)"
     },
     {
         "nombre": "Clorinda - Puerto José Falcón",
-        "id": "71"
+        "localidades": "Clorinda (AR) – José Falcón (PY) por Puente Internacional San Ignacio de Loyola"
     },
     {
         "nombre": "Colonia General Belgrano - General Bruguez",
-        "id": "17"
+        "localidades": "General Belgrano (AR) – General Bruguez (PY)"
     },
     {
         "nombre": "Colón - Paysandú",
-        "id": "3"
+        "localidades": "Colón (AR) – Paysandú (UY) por Puente Internacional Gral. José Gervasio Artigas"
     },
     {
         "nombre": "Concordia - Salto",
-        "id": "5"
+        "localidades": "Concordia (AR) – Salto (UY) por Puente Represa Hidroeléctrica Salto Grande"
     },
     {
         "nombre": "Copahue",
-        "id": "43"
+        "localidades": "Copahue (AR) – Valle de Trapa Trapa (CL) por camino de herradura"
     },
     {
         "nombre": "Coyhaique",
-        "id": "55"
+        "localidades": "Río Mayo (AR) – Coyhaique (CL)"
     },
     {
         "nombre": "Dorotea",
-        "id": "61"
+        "localidades": "Río Turbio (AR) – Puerto Natales (CL)"
     },
     {
         "nombre": "El Condado - La Mamora",
-        "id": "35"
+        "localidades": "Los Toldos (AR) – La Mamora (BO)"
     },
     {
         "nombre": "El Soberbio - Porto Soberbo",
-        "id": "87"
+        "localidades": "El Soberbio (AR) – Porto Soberbo (BR)"
     },
     {
         "nombre": "Futaleufú",
-        "id": "49"
+        "localidades": "Travelin (AR) – Fataleufú (CL)"
     },
     {
         "nombre": "Gualeguaychú - Fray Bentos",
-        "id": "4"
+        "localidades": "Gualeguaychú (AR) – Fray Bentos (UY) por Puente Internacional Gral. San Martín"
     },
     {
         "nombre": "Hua Hum",
-        "id": "39"
+        "localidades": "San Martín de los Andes (AR) – Panguipulli (CL) por transbordador en Lago Pirihueico"
     },
     {
         "nombre": "Huemules",
-        "id": "56"
+        "localidades": "Lago Blanco (AR) – Balmaceda (CL)"
     },
     {
         "nombre": "Icalma",
-        "id": "38"
+        "localidades": "Villa Pehuenia (AR) – Icalma (CL)"
     },
     {
         "nombre": "Iguazú - Foz de Iguazú",
-        "id": "2"
+        "localidades": "Puerto Iguazú (AR) – Foz de Iguazú (BR) por Puente Internacional Tancredo Neves"
     },
     {
         "nombre": "Ingeniero Pallavicini - Ibáñez",
-        "id": "60"
+        "localidades": "Perito Moreno (AR) – Puerto Ibañez (CL)"
     },
     {
         "nombre": "Integración Austral",
-        "id": "68"
+        "localidades": "Río Gallegos (AR) – Punta Arenas (CL)"
     },
     {
         "nombre": "Integración - Planalto",
-        "id": "15"
+        "localidades": ""
     },
     {
         "nombre": "Isleta - Paraje Rojas Silva",
-        "id": "6"
+        "localidades": "Paraje Isleta (AR) – Fortín Tte. Cnl. Rojas Silva (PY) por camino vecinal de tierra (acceso con vehículos 4x4)"
     },
     {
         "nombre": "Jama",
-        "id": "19"
+        "localidades": "Paraje Jama (AR) – San Pedro de Atacama (CL)"
     },
     {
         "nombre": "Jeinimeni",
-        "id": "58"
+        "localidades": "Los Antiguos (AR) – Chile Chico (CL)"
     },
     {
         "nombre": "Lago San Martín - O´Higgins",
-        "id": "65"
+        "localidades": "Lago San Martín (AR) – Lago O`Higgins (CL) sin medios públicos para paso"
     },
     {
         "nombre": "La Quiaca - Villazón",
-        "id": "18"
+        "localidades": "La Quiaca (AR) – Villazón (BO) por Puente Internacional La Quiaca"
     },
     {
         "nombre": "Las Pampas",
-        "id": "51"
+        "localidades": "Atilio Viglione (AR) – Lago Verde (CL)"
     },
     {
         "nombre": "Laurita - Casas Viejas",
-        "id": "62"
+        "localidades": "28 de Noviembre (AR) – Puerto Natales (CL)"
     },
     {
         "nombre": "Mamuil Malal",
-        "id": "40"
+        "localidades": "Junín de los Andes (AR) – Curarrehue (CL)"
     },
     {
         "nombre": "Misión La Paz - Pozo Hondo",
-        "id": "72"
+        "localidades": "Misión La Paz (AR) – Pozo Hondo (PY)"
     },
     {
         "nombre": "Pampa Alta",
-        "id": "54"
+        "localidades": "Alto Río Senguer (AR) – Villa Ñirehuao (CL)"
     },
     {
         "nombre": "Panambí - Vera Cruz",
-        "id": "89"
+        "localidades": "Panambi (AR) – Vera Cruz (BR)"
     },
     {
         "nombre": "Pasarela La Fraternidad",
-        "id": "31"
+        "localidades": "Clorinda (AR) – Nanawa (PY)"
     },
     {
         "nombre": "Paso de los Libres - Uruguayana",
-        "id": "73"
+        "localidades": "Paso de los Libres (AR) – Uruguayana (BR) por Puente Internacional Agustín P. Justo – Getulio Vargas"
     },
     {
         "nombre": "Paso El Remanso - La Verde",
-        "id": "7"
+        "localidades": "Paraje El Remanso (AR) – Fortín Gral. Díaz (PY) por camino vecinal de tierra (acceso con vehículos 4x4)"
     },
     {
         "nombre": "Paso Lamadrid - Misión San Leonardo",
-        "id": "16"
+        "localidades": "Paraje Lamadrid (AR) – Misión San Leonardo (PY) por camino vecinal de tierra (acceso vehículos 4x4)"
     },
     {
         "nombre": "Paso de la Barca - Porto Xavier",
-        "id": "10"
+        "localidades": "San Javier (AR) – Porto Xavier (BR)"
     },
     {
         "nombre": "Pehuenche",
-        "id": "32"
+        "localidades": "Malargüe (AR) – Talca (CL) por ruta asfaltada"
     },
     {
         "nombre": "Pepiri Guazú - Sao Miguel",
-        "id": "13"
+        "localidades": "San Pedro (AR) – Sao Miguel do Oeste (BR)"
     },
     {
         "nombre": "Pichachén",
-        "id": "34"
+        "localidades": "El Cholar (AR) – Antuco (CL)"
     },
     {
         "nombre": "Pino Hachado",
-        "id": "37"
+        "localidades": "Las Lajas (AR) – Liucura (CL)"
     },
     {
         "nombre": "Pircas Negras",
-        "id": "26"
+        "localidades": "Paraje Jagüé (AR) – Paraje Los Loros (CL)"
     },
     {
         "nombre": "Portillo de Piuquenes",
-        "id": "30"
+        "localidades": "Tunuyán (AR) – San Gabriel (CL)"
     },
     {
         "nombre": "Posadas - Encarnación",
-        "id": "1"
+        "localidades": "Posadas (AR) – Encarnación (PY)"
     },
     {
         "nombre": "Puerto Alba Posse - Porto Maua",
-        "id": "88"
+        "localidades": "Alba Possse (AR) – Porto Maua (BR)"
     },
     {
         "nombre": "Puerto Alvear - Puerto Itaqui",
-        "id": "17"
+        "localidades": "Puerto Alvear (AR) – Puerto Itaquí (BR)"
     },
     {
         "nombre": "Puerto Bermejo - Puerto Pilar",
-        "id": "74"
+        "localidades": "Puerto Bermejo (AR)- Pilar (PY)"
     },
     {
         "nombre": "Puerto Boca del Gualeguaychu - Fray Bentos",
-        "id": "80"
+        "localidades": "Gualeguaychú (AR) – Fray Bentos (UY)"
     },
     {
         "nombre": "Puerto Candelaria - Campichuelo",
-        "id": "52"
+        "localidades": "Puerto Candelaria (AR) – Puerto Campichuelo (PY)"
     },
     {
         "nombre": "Puerto Chalanas - Bermejo",
-        "id": "24"
+        "localidades": "Aguas Blancas (AR) – Bermejo (BO)"
     },
     {
         "nombre": "Puerto Colon - Puerto Paysandu",
-        "id": "82"
+        "localidades": "Colón (AR) – Paysandú (UY)"
     },
     {
         "nombre": "Puerto Colonia Aurora - Porto Pratos",
-        "id": "92"
+        "localidades": "Puerto Colonia Aurora (AR) – Porto Pratos (BR)"
     },
     {
         "nombre": "Puerto Colonia Cano - Puerto Pilar",
-        "id": "71"
+        "localidades": "Puerto Colonia Cano (AR) – Puerto Pilar (PY)"
     },
     {
         "nombre": "Puerto Concepcion del Uruguay - Paysandu",
-        "id": "79"
+        "localidades": "Puerto Concepción del Uruguay (AR) – Paysandú (UY)"
     },
     {
         "nombre": "Puerto Concordia - Salto",
-        "id": "11"
+        "localidades": "Concordia (AR) – Salto (UY)"
     },
     {
         "nombre": "Puerto Eldorado - Puerto Mayor Julio Otaño",
-        "id": "15"
+        "localidades": "Puerto Eldorado (AR) – Puerto Mayor Julio Otaño (PY)"
     },
     {
         "nombre": "Puerto Federacion - Villa Constitucion",
-        "id": "83"
+        "localidades": "Puerto Federación (AR) – Villa Constitución (UY)"
     },
     {
         "nombre": "Puerto Formosa - Puerto Alberdi",
-        "id": "70"
+        "localidades": "Puerto Formosa (AR) – Puerto Alberdi (PY)"
     },
     {
         "nombre": "Puerto Garruchos - Garruchos",
-        "id": "62"
+        "localidades": "Garruchos (AR) – Garruchos (BR)"
     },
     {
         "nombre": "Puerto Garuhape - Puerto 3 de Mayo",
-        "id": "46"
+        "localidades": "Puerto Garuhapé (AR) – Puerto 3 de Febrero (PY)"
     },
     {
         "nombre": "Puerto Guazu Guazucito - Carmelo",
-        "id": "67"
+        "localidades": "San Fernando (AR) – Carmelo (UY)"
     },
     {
         "nombre": "Puerto Iguazu - Puerto Tres Fronteras",
-        "id": "56"
+        "localidades": "Puerto Iguazú (AR) – Puerto Tres Fronteras (PY)"
     },
     {
         "nombre": "Puerto Ita Ibate - Panchito Lopez",
-        "id": "60"
+        "localidades": "Puerto Itá Ibaté (AR) – Puerto Panchito López (PY)"
     },
     {
         "nombre": "Puerto Itati - Puerto Ita Cora",
-        "id": "73"
+        "localidades": "Itatí (AR) – Itá Corá (PY)"
     },
     {
         "nombre": "Puerto Ituzaingo - Puerto Ayolas",
-        "id": "69"
+        "localidades": "Ituzaingó (AR) – Puerto San Antonio (AR)"
     },
     {
         "nombre": "Puerto La Cruz - Itaqui",
-        "id": "65"
+        "localidades": "Puerto La Cruz (AR) - Itaquí (BR)"
     },
     {
         "nombre": "Puerto Las Palmas - Puerto Humaita",
-        "id": "75"
+        "localidades": "Puerto Las Palmas (AR) – Humaitá (PY)"
     },
     {
         "nombre": "Puerto Leoni - Puerto Triunfo",
-        "id": "49"
+        "localidades": "Puerto Leoni (AR) - Puerto Triunfo (PY)"
     },
     {
         "nombre": "Puerto Libertad - Puerto Domingo Martínez de Irala",
-        "id": "37"
+        "localidades": "Puerto Libertad (AR) - Domingo Martínez de Irala (PY)"
     },
     {
         "nombre": "Puerto Luis - Constitucion",
-        "id": "84"
+        "localidades": "Puerto Luis (AR) – Villa Constitución (UY)"
     },
     {
         "nombre": "Puerto Mado - Puerto Lomas Valentinas",
-        "id": "41"
+        "localidades": "Eldorado (AR) - Lomas Valentinas (PY)"
     },
     {
         "nombre": "Puerto Mani - Puerto Bella Vista Sur",
-        "id": "50"
+        "localidades": "Corpus Christi (AR) – Bella Vista Sur (PY)"
     },
     {
         "nombre": "Puerto Martin Garcia - Carmelo",
-        "id": "68"
+        "localidades": "Isla Martín García (AR) – Puerto Carmelo (UY)"
     },
     {
         "nombre": "Puerto Monte Caseros - Bella Union",
-        "id": "66"
+        "localidades": "Monte Caseros (AR) - Bella Unión (UY)"
     },
     {
         "nombre": "Puerto Montecarlo - Puerto Ape Aime",
-        "id": "43"
+        "localidades": "Montecarlo (AR) – Ape Aime (PY)"
     },
     {
         "nombre": "Puerto Oasis - Capitan Meza",
-        "id": "51"
+        "localidades": "Colonia Oasis (AR) – Capitán Meza (PY)"
     },
     {
         "nombre": "Puerto Paranacito - Nueva Palmira",
-        "id": "86"
+        "localidades": "Villa Paranacito (AR) – Nueva Palmira (UY)"
     },
     {
         "nombre": "Puerto Paranay - Colonia Alborada",
-        "id": "45"
+        "localidades": "Puerto Paranay (AR) – Colonia Alborada (PY)"
     },
     {
         "nombre": "Puerto Paso de la Patria - Paso de la Patria",
-        "id": "76"
+        "localidades": "Puerto Paso de la Patria (AR) – Puerto Paso de Patria (PY)"
     },
     {
         "nombre": "Puerto Pilcomayo - Puerto Ita Enramada",
-        "id": "4"
+        "localidades": "Puerto Pilcomayo (AR) – Itá Enramada (PY)"
     },
     {
         "nombre": "Puerto Pinares - Carlos Antonio Lopez",
-        "id": "40"
+        "localidades": "Eldorado (AR) – Carlos Antonio López (PY)"
     },
     {
         "nombre": "Puerto Piray - Puerto 7 de Agosto",
-        "id": "42"
+        "localidades": "Puerto Piray (AR) – Colonia 7 de Agosto (PY)"
     },
     {
         "nombre": "Puerto Rico - Puerto Triunfo",
-        "id": "44"
+        "localidades": "Puerto Rico (AR) – Puerto Triunfo (PY)"
     },
     {
         "nombre": "Puerto San Antonio de Apipe - Puerto Ayolas",
-        "id": "59"
+        "localidades": "Isla San Antonio (AR) – Misiones (PY)"
     },
     {
         "nombre": "Puerto San Ignacio - Puerto Paraiso",
-        "id": "48"
+        "localidades": "San Ignacio (AR) – Nueva Alborada (PY)"
     },
     {
         "nombre": "Puerto San Isidro - San Isidro",
-        "id": "53"
+        "localidades": "Colonia San Isidro (AR) – Colonia San Isidro (BR)"
     },
     {
         "nombre": "Puerto Santa Ana - Puerto Samuhu",
-        "id": "47"
+        "localidades": "Puerto Santa Ana (AR) – Puerto Samuhú (PY)"
     },
     {
         "nombre": "Puerto Santa Eloisa - Belen",
-        "id": "85"
+        "localidades": "Puerto Santa Eloísa (AR) – Belén (UY)"
     },
     {
         "nombre": "Puerto Santa María - Colonia Florida",
-        "id": "6"
+        "localidades": "Colonia Santa María (AR) – Colonia Florida (PY)"
     },
     {
         "nombre": "Puerto Victoria - Capitan Urbina",
-        "id": "39"
+        "localidades": "Victoria (AR) – Capitán Urbina (PY)"
     },
     {
         "nombre": "Puerto Wanda - Puerto Ita Vera",
-        "id": "38"
+        "localidades": "Colonia Wanda (AR) – Puerto Itá Verá (PY)"
     },
     {
         "nombre": "Puerto Yahape - Puerto Cerrito",
-        "id": "61"
+        "localidades": "Puerto Yahapé (AR) – Puerto Cerrito (PY)"
     },
     {
         "nombre": "Puerto Yapeyu - Puerto San Marcos",
-        "id": "64"
+        "localidades": "Puerto Yapeyú (AR) – San Marcos (BR)"
     },
     {
         "nombre": "Pérez Rosales",
-        "id": "45"
+        "localidades": "Lago Frías (AR) – Peulla (CL)"
     },
     {
         "nombre": "Roballos",
-        "id": "59"
+        "localidades": "Paso Rodolfo Roballos (AR) – Cochrane (CL)"
     },
     {
         "nombre": "Río Bella Vista (Ex Radman)",
-        "id": "70"
+        "localidades": "Río Grande (AR) – Villa Camerón (CL)"
     },
     {
         "nombre": "Río Don Guillermo",
-        "id": "63"
+        "localidades": "Río Turbio (AR) – Torres del Paine (CL)"
     },
     {
         "nombre": "Río Encuentro",
-        "id": "50"
+        "localidades": "Travelin (AR) – Palena (CL)"
     },
     {
         "nombre": "Río Frías",
-        "id": "53"
+        "localidades": "Aldea Apeleg (AR) – Puerto Cisnes (CL)"
     },
     {
         "nombre": "Río Manso",
-        "id": "47"
+        "localidades": "Paraje El Manso (AR) – Paraje El León (CL)"
     },
     {
         "nombre": "Río Mayer - Ribera Norte",
-        "id": "57"
+        "localidades": "Gobernador Gregores (AR) – Villa O´Higgins (CL)"
     },
     {
         "nombre": "Río Mosco",
-        "id": "64"
+        "localidades": "Grupo Cocovi (AR) – Villa O`Higgins (CL) por sendas"
     },
     {
         "nombre": "Río Puelo",
-        "id": "48"
+        "localidades": "Lago Puelo (AR) – Segundo Corral (CL)"
     },
     {
         "nombre": "Salvador Mazza - Yacuiba",
-        "id": "22"
+        "localidades": "Salvador Mazza (AR) – Yacuiba (BO)"
     },
     {
         "nombre": "San Antonio - Santo Antonio",
-        "id": "14"
+        "localidades": "San Antonio (AR) – Santo Antonio (BR)"
     },
     {
         "nombre": "San Francisco",
-        "id": "25"
+        "localidades": "Las Grutas (AR) – Copiapó (CL)"
     },
     {
         "nombre": "San Sebastián",
-        "id": "69"
+        "localidades": "Paraje San Sebastián (AR) – Porvenir (CL)"
     },
     {
         "nombre": "Santo Tomé - Sao Borja",
-        "id": "74"
+        "localidades": "Santo Tomé (AR) – Sao Borja (BR) por Puente Internacional de la Integración"
     },
     {
         "nombre": "Sico",
-        "id": "20"
+        "localidades": "San Antonio de los Cobres (AR) – San Pedro de Atacama (CL)"
     },
         {
         "nombre": "Sistema Cristo Redentor",
-        "id": "29"
+        "localidades": "Villa Las Cuevas (AR) – Los Andes (CL)"
     },
     {
         "nombre": "Socompa",
-        "id": "21"
+        "localidades": "Salta (AR) – Antofagasta (CL)"
     },
     {
         "nombre": "Triana",
-        "id": "52"
+        "localidades": "Aldea Beleiro (AR) – Coyhaique (CL)"
     },
     {
         "nombre": "Vergara",
-        "id": "33"
+        "localidades": "Malargüe (AR) – Curico (CL)"
     },
     {
         "nombre": "Vuriloche",
-        "id": "46"
+        "localidades": "Pampa Linda (AR) – Ralun (CL) a caballo o a pie"
     },
     {
         "nombre": "Yaciretá - Yaciretá",
-        "id": "36"
+        "localidades": "Ituzaingó (AR) – Ayolas (PY)"
     }
 ]
