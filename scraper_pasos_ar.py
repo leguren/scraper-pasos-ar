@@ -196,7 +196,6 @@ async def scrapear():
         hs_a = data.get("fecha_schema")
 
         resultado.append({
-            "id": int(paso["id"]),
             "nombre": data.get("nombre_paso"),
             "localidades": paso.get("localidades") or None,
             "estado": data.get("estado_prioridad"),
@@ -211,4 +210,5 @@ async def scrapear():
     cache["data"] = resultado
     cache["timestamp"] = datetime.now()
     return JSONResponse(content=resultado)
+
 
