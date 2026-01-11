@@ -198,6 +198,7 @@ async def scrapear():
         resultado.append({
             "id": int(paso["id"]),
             "nombre": data.get("nombre_paso"),
+            "localidades": paso.get("localidades"),
             "estado": data.get("estado_prioridad"),
             "provincia": data.get("provincia"),
             "pais": data.get("pais"),
@@ -210,7 +211,3 @@ async def scrapear():
     cache["data"] = resultado
     cache["timestamp"] = datetime.now()
     return JSONResponse(content=resultado)
-
-
-
-
